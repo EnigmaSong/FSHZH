@@ -6,26 +6,26 @@ library(openxlsx)
 
 ###############
 #Aripo
-counts_Aripo <-read.delim(file = "~/Dropbox/Project_Kim/data/guppy_kallisto_genes.counts.matrix", 
+counts_genome_Aripo <-read.csv(file = "~/Dropbox/Project_Kim/data/OLD_counts_matrix.csv", 
                         row.names=1, stringsAsFactors = FALSE) %>% ceiling()
 # Old behaviroal data
 behave_Aripo <- read.xlsx(xlsxFile = "~/Dropbox/Project_Kim/data/behavioral_data_updated.xlsx",1)
 
 #Quare
-counts_Quare  <- read.delim(file = "~/Dropbox/Project_Kim/data/b02_kallisto_genes.counts.matrix", 
+counts_genome_Quare  <- read.csv(file = "~/Dropbox/Project_Kim/data/NEW_counts_matrix.csv", 
                           row.names=1, stringsAsFactors = FALSE) %>% ceiling()
 # New behaviroal data
 behave_Quare <- read.xlsx(xlsxFile = "~/Dropbox/Project_Kim/data/behavioral_data_2.0.xlsx",1)
 
 ###
 #Behavioral data cleaning
-behave_Aripo$fish[1:9] <- paste("bo00",behave_Aripo$fish[1:9],sep="")
-behave_Aripo$fish[-(1:9)] <- paste("bo0",behave_Aripo$fish[-(1:9)],sep="")
+behave_Aripo$fish[1:9] <- paste("X00",behave_Aripo$fish[1:9],sep="")
+behave_Aripo$fish[-(1:9)] <- paste("X0",behave_Aripo$fish[-(1:9)],sep="")
 rownames(behave_Aripo)<- behave_Aripo$fish
 behave_Aripo$pop <- factor(behave_Aripo$pop,levels = c("LP","HP"))
 behave_Aripo$rear <- factor(behave_Aripo$rear, levels  = c("P","NP"))
 behave_Aripo$group = factor(paste0(behave_Aripo$pop,behave_Aripo$rear))
-behave_Aripo <- behave_Aripo[colnames(counts_Aripo),]
+behave_Aripo <- behave_Aripo[colnames(counts_genome_Aripo),]
 
 # Add cross effect in behaviroal data
 behave_Aripo$cross <- 1:40
@@ -35,11 +35,10 @@ behave_Aripo$cross <- factor(behave_Aripo$cross)
 behave_Aripo$cross
 behave_Aripo$group = paste(behave_Aripo$pop,behave_Aripo$rear,sep="")
 
-
-behave_Quare<- behave_Quare[match(colnames(counts_Quare),behave_Quare$fish),]
+behave_Quare<- behave_Quare[match(colnames(counts_genome_Quare),behave_Quare$fish),]
 
 #Remove problematic samples - M17, M15
-counts_Quare <- counts_Quare[,-c(14,16)]
+counts_genome_Quare <- counts_genome_Quare[,-c(14,16)]
 behave_Quare<-behave_Quare[-c(14,16),]
 
 behave_Quare$cross = 1:58

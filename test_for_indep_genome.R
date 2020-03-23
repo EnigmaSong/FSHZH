@@ -1,56 +1,22 @@
-# Chi-square test for independence (excluding significant interaction genes)
-# Pop vs rearing in the same data set
-# Pop in two data set
+#Chi-square tests
 
-######################
-# Pop vs rearing in the same data set
-#Aripo: Excluding significant interaction gene
-Aripo_pop_DE = unlist(Aripo_DE_res$pop_DE_flag)
-Aripo_rear_DE = unlist(Aripo_DE_res$rear_DE_flag)
+#read xlsx
 
-#Quare: Excluding significant interaction gene
-Quare_pop_DE = unlist(Quare_DE_res$pop_DE_flag)
-Quare_rear_DE = unlist(Quare_DE_res$rear_DE_flag)
+# Aripo_DE_res_genome = read.csv("output/Aripo_glmer_effects_genome.csv")
+# Quare_DE_res_genome = read.csv("output/Quare_glmer_genome.csv")
 
-##Including up&down regulated
-#Aripo
-Aripo_pop_ud = ifelse(Aripo_pop_DE & unlist(Aripo_DE_res$pop_estim >0), "DEU", 
-                      ifelse(Aripo_pop_DE & unlist(Aripo_DE_res$pop_estim <0), "DED",
-                             ifelse(!Aripo_pop_DE & unlist(Aripo_DE_res$pop_estim >0), "NDEU","NDED")))
-Aripo_rear_ud = ifelse(Aripo_rear_DE & unlist(Aripo_DE_res$rear_estim >0), "DEU", 
-                       ifelse(Aripo_rear_DE & unlist(Aripo_DE_res$rear_estim <0), "DED",
-                              ifelse(unlist(Aripo_DE_res$rear_estim >0), "NDEU","NDED")))
+library(openxlsx)
 
-#Excluding interaction genes
-table(Aripo_pop_ud[!Aripo_DE_res$inter_DE_flag],Aripo_rear_ud[!Aripo_DE_res$inter_DE_flag])
-chisq.test(table(Aripo_pop_ud[!Aripo_DE_res$inter_DE_flag],
-                 Aripo_rear_ud[!Aripo_DE_res$inter_DE_flag]),
-           simulate.p.value = TRUE)
-# table(Aripo_pop_ud,Aripo_rear_ud)
-# chisq.test(table(Aripo_pop_ud,Aripo_rear_ud),simulate.p.value = TRUE)#Recap : using all genes (chisq = 491.96 pval = 0.00049)
-#Quare
-Quare_pop_ud = ifelse(Quare_pop_DE & unlist(Quare_DE_res$pop_estim >0), "DEU", 
-                      ifelse(Quare_pop_DE & unlist(Quare_DE_res$pop_estim <0), "DED",
-                             ifelse(unlist(Quare_DE_res$pop_estim >0), "NDEU","NDED")))
-Quare_rear_ud = ifelse(Quare_rear_DE & unlist(Quare_DE_res$rear_estim >0), "DEU", 
-                       ifelse(Quare_rear_DE & unlist(Quare_DE_res$rear_estim <0), "DED",
-                              ifelse(unlist(Quare_DE_res$rear_estim >0), "NDEU","NDED")))
+Aripo_DE_res=read.xlsx("../../outputs/DE_GLMM_genome.xlsx",sheet=2)
+Quare_DE_res=read.xlsx("../../outputs/DE_GLMM_genome.xlsx",sheet=3)
 
-#Excluding interaction genes
-table(Quare_pop_ud[!Quare_DE_res$inter_DE_flag],Quare_rear_ud[!Quare_DE_res$inter_DE_flag])
-chisq.test(table(Quare_pop_ud[!Quare_DE_res$inter_DE_flag],Quare_rear_ud[!Quare_DE_res$inter_DE_flag]),
-           simulate.p.value = TRUE)
-
-#########################
-# Pop/rear in two data set
-#If we include all genes
-# merged_DE_res = merge(Aripo_DE_res,Quare_DE_res,by = "gene",suffixes = c("_Aripo","_Quare"))
-
-#If we exclude significant interaction genes, 19218
+#If we exclude significant interaction genes, 
 merged_DE_res = merge(Aripo_DE_res[!Aripo_DE_res$inter_DE_flag,],
-                      Quare_DE_res[!Quare_DE_res$inter_DE_flag,],by = "gene",
+                      Quare_DE_res[!Quare_DE_res$inter_DE_flag,],
+                      # by = "gene",
+                      by = "Id",
                       suffixes = c("_Aripo","_Quare"))
-##Re-obtain direction and DE/NDE information for 19218 genes
+##Re-obtain direction and DE/NDE information 
 Aripo_pop_ud2 = ifelse(merged_DE_res$pop_DE_flag_Aripo & unlist(merged_DE_res$pop_estim_Aripo >0), "DEU", 
                        ifelse(merged_DE_res$pop_DE_flag_Aripo & unlist(merged_DE_res$pop_estim_Aripo <0), "DED",
                               ifelse(!merged_DE_res$pop_DE_flag_Aripo & unlist(merged_DE_res$pop_estim_Aripo >0), 
@@ -130,5 +96,3 @@ fisher.test(aaaaa,
 chisq.test(aa[1:2,1:2],simulate.p.value=TRUE)
 fisher.test(aa[1:2,1:2],simulate.p.value=TRUE)
 
-chisq.test(table(Aripo_pop_ud2,Aripo_rear_ud2),simulate.p.value = TRUE)
-chisq.test(table(Quare_pop_ud2,Quare_rear_ud2),simulate.p.value = TRUE)
