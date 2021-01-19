@@ -17,11 +17,12 @@ library(lsmeans)
 ############################
 # Load user-defined functions, change path accordingly
 setwd("DE_github")
-source("Data_preprocessing/normalize.R")
-source("Data_preprocessing/miscellaneous.R")
+source("Data preprocessing/normalize.R")
+source("Data preprocessing/miscellaneous.R")
 #############################
 # Step 0: data pre-processing 
-source("Data_preprocessing/pre_processing_genome.R")
+# To change data file path, edit pre_processing_genome.R.
+source("Data preprocessing/pre_processing_genome.R")
 
 ###
 #Draw MDS plot
@@ -48,7 +49,7 @@ dd_genome_Aripo <- DESeqDataSetFromMatrix(countData = counts_genome_Aripo,
 dd_genome_Aripo <- dd_genome_Aripo[ rowSums(counts(dd_genome_Aripo)) > 50, ]
 
 ctm_candidate_genome <- rownames(counts(dd_genome_Aripo))
-#Load names
+#Load seed-gene names. Change the file path accordingly
 ctm_gene_name_genome <- read.csv('../../data/seedGenes.csv', stringsAsFactor =FALSE)[,1]
 # ctm_gene_genome_idx = match(ctm_gene_name_genome,ctm_candidate_genome)
 ### We use 7 genomes as seeding genes.
@@ -326,12 +327,13 @@ Aripo_DE_res_genome = foreach(i=1:p, .combine = rbind,.packages = c("lme4","MASS
                          #test contrast to check population and rearing effect
                          # main_eff=test(lsmeans(fit_glmer,~group,contr=list(pop=c(0.5,0.5,-0.5,-0.5),rear=c(0.5,-0.5,0.5,-0.5),
                          #                                                   interaction=c(1,-1,-1,1)))$contrasts)
-                         main_eff=test(lsmeans(fit_glmer,~pop*rear,contr=list(pop=c(0.5,-0.5,0.5,-0.5),rear=c(-0.5,-0.5,0.5,0.5),
+                         main_eff=test(lsmeans(fit_glmer,~pop*rear,contr=list(pop=c(-0.5,0.5,-0.5,0.5),rear=c(0.5,0.5,-0.5,-0.5),
                                                                               inter=c(1,-1,-1,1),
-                                                                              simple_pop_fix_rearNP= c(1,-1,0,0),
-                                                                              simple_pop_fix_rearP= c(0,0,1,-1),
-                                                                              simple_rear_fix_popHP= c(-1,0,1,0),
-                                                                              simple_rear_fix_popLP= c(0,-1,0,1)
+                                                                              simple_HPP_LPP= c(-1,1,0,0),
+                                                                              simple_HPNP_LPNP= c(0,0,-1,1),
+                                                                              simple_LPP_LPNP= c(1,0,-1,0),
+                                                                              simple_HPP_HPNP= c(0,1,0,-1)
+                                                                              
                          ))$contrasts)
                          
                          return(c(i, id = rownames(norm_counts_Aripo_genome)[i],
@@ -340,14 +342,14 @@ Aripo_DE_res_genome = foreach(i=1:p, .combine = rbind,.packages = c("lme4","MASS
                                   estim_pop = main_eff[1,2], se_pop = main_eff[1,3], stat_pop_wald=main_eff[1,5], pval_pop_wald = main_eff[1,6],
                                   estim_rear = main_eff[2,2], se_rear = main_eff[2,3], stat_rear_wald=main_eff[2,5], pval_rear_wald = main_eff[2,6],
                                   estim_int = main_eff[3,2], se_int = main_eff[3,3], stat_int_wald=main_eff[3,5], pval_int_wald = main_eff[3,6],
-                                  estim_simple_pop_fix_rearNP = main_eff[4,2], se_simple_pop_fix_rearNP = main_eff[4,3],
-                                  stat_simple_pop_fix_rearNP_wald=main_eff[4,5], pval_simple_pop_fix_rearNP_wald = main_eff[4,6],
-                                  estim_simple_pop_fix_rearP = main_eff[5,2], se_simple_pop_fix_rearP= main_eff[5,3],
-                                  stat_simple_pop_fix_rearP_wald=main_eff[5,5], pval_simple_pop_fix_rearP_wald = main_eff[5,6],
-                                  estim_simple_rear_fix_popHP  = main_eff[6,2], se_simple_rear_fix_popHP = main_eff[6,3],
-                                  stat_simple_rear_fix_popHP_wald=main_eff[6,5], pval_simple_rear_fix_popHP_wald = main_eff[6,6],
-                                  estim_simple_rear_fix_popLP= main_eff[7,2], se_simple_rear_fix_popLP = main_eff[7,3],
-                                  stat_simple_rear_fix_popLP_wald=main_eff[7,5], pval_simple_rear_fix_popLP_wald = main_eff[7,6],
+                                  estim_simple_HPP_LPP = main_eff[4,2], se_simple_HPP_LPP = main_eff[4,3], 
+                                  stat_simple_HPP_LPP_wald=main_eff[4,5], pval_simple_HPP_LPP_wald = main_eff[4,6],
+                                  estim_simple_HPNP_LPNP = main_eff[5,2], se_simple_HPNP_LPNP= main_eff[5,3],
+                                  stat_simple_HPNP_LPNP_wald=main_eff[5,5], pval_simple_HPNP_LPNP_wald = main_eff[5,6],
+                                  estim_simple_LPP_LPNP = main_eff[6,2], se_simple_LPP_LPNP = main_eff[6,3],
+                                  stat_simple_LPP_LPNP_wald=main_eff[6,5], pval_simple_LPP_LPNP_wald = main_eff[6,6],
+                                  estim_simple_HPP_HPNP= main_eff[7,2], se_simple_HPP_HPNP = main_eff[7,3],
+                                  stat_simple_HPP_HPNP_wald=main_eff[7,5], pval_simple_HPP_HPNP_wald = main_eff[7,6],
                                   model_comp_stat = model_comp[1],model_comp_df = model_comp[2],  
                                   model_comp_pval = model_comp[3],
                                   conv_opt = sum_glmer$optinfo$conv$opt,
@@ -454,12 +456,12 @@ Quare_DE_res_genome1 = foreach(i=1:p, .combine = rbind,.packages = c("lme4","MAS
                          #pop: HP-LP
                          #rear: P-NP
                          
-                         main_eff=test(lsmeans(fit_glmer,~pop*rear,contr=list(pop=c(0.5,-0.5,0.5,-0.5),rear=c(-0.5,-0.5,0.5,0.5),
+                         main_eff=test(lsmeans(fit_glmer,~pop*rear,contr=list(pop=c(-0.5,0.5,-0.5,0.5),rear=c(0.5,0.5,-0.5,-0.5),
                                                                               inter=c(1,-1,-1,1),
-                                                                              simple_pop_fix_rearNP= c(1,-1,0,0),
-                                                                              simple_pop_fix_rearP= c(0,0,1,-1),
-                                                                              simple_rear_fix_popHP= c(-1,0,1,0),
-                                                                              simple_rear_fix_popLP= c(0,-1,0,1)
+                                                                              simple_HPP_LPP= c(-1,1,0,0),
+                                                                              simple_HPNP_LPNP= c(0,0,-1,1),
+                                                                              simple_LPP_LPNP= c(1,0,-1,0),
+                                                                              simple_HPP_HPNP= c(0,1,0,-1)
                          ))$contrasts)
                          
                          return(c(i, id = rownames(norm_counts_Quare_genome)[i],
@@ -468,14 +470,14 @@ Quare_DE_res_genome1 = foreach(i=1:p, .combine = rbind,.packages = c("lme4","MAS
                                   estim_pop = main_eff[1,2], se_pop = main_eff[1,3], stat_pop_wald=main_eff[1,5], pval_pop_wald = main_eff[1,6],
                                   estim_rear = main_eff[2,2], se_rear = main_eff[2,3], stat_rear_wald=main_eff[2,5], pval_rear_wald = main_eff[2,6],
                                   estim_int = main_eff[3,2], se_int = main_eff[3,3], stat_int_wald=main_eff[3,5], pval_int_wald = main_eff[3,6],
-                                  estim_simple_pop_fix_rearNP = main_eff[4,2], se_simple_pop_fix_rearNP = main_eff[4,3], 
-                                  stat_simple_pop_fix_rearNP_wald=main_eff[4,5], pval_simple_pop_fix_rearNP_wald = main_eff[4,6],
-                                  estim_simple_pop_fix_rearP = main_eff[5,2], se_simple_pop_fix_rearP= main_eff[5,3],
-                                  stat_simple_pop_fix_rearP_wald=main_eff[5,5], pval_simple_pop_fix_rearP_wald = main_eff[5,6],
-                                  estim_simple_rear_fix_popHP  = main_eff[6,2], se_simple_rear_fix_popHP = main_eff[6,3],
-                                  stat_simple_rear_fix_popHP_wald=main_eff[6,5], pval_simple_rear_fix_popHP_wald = main_eff[6,6],
-                                  estim_simple_rear_fix_popLP= main_eff[7,2], se_simple_rear_fix_popLP = main_eff[7,3],
-                                  stat_simple_rear_fix_popLP_wald=main_eff[7,5], pval_simple_rear_fix_popLP_wald = main_eff[7,6],
+                                  estim_simple_HPP_LPP = main_eff[4,2], se_simple_HPP_LPP = main_eff[4,3], 
+                                  stat_simple_HPP_LPP_wald=main_eff[4,5], pval_simple_HPP_LPP_wald = main_eff[4,6],
+                                  estim_simple_HPNP_LPNP = main_eff[5,2], se_simple_HPNP_LPNP= main_eff[5,3],
+                                  stat_simple_HPNP_LPNP_wald=main_eff[5,5], pval_simple_HPNP_LPNP_wald = main_eff[5,6],
+                                  estim_simple_LPP_LPNP = main_eff[6,2], se_simple_LPP_LPNP = main_eff[6,3],
+                                  stat_simple_LPP_LPNP_wald=main_eff[6,5], pval_simple_LPP_LPNP_wald = main_eff[6,6],
+                                  estim_simple_HPP_HPNP= main_eff[7,2], se_simple_HPP_HPNP = main_eff[7,3],
+                                  stat_simple_HPP_HPNP_wald=main_eff[7,5], pval_simple_HPP_HPNP_wald = main_eff[7,6],
                                   model_comp_stat = model_comp[1],model_comp_df = model_comp[2],  
                                   model_comp_pval = model_comp[3],
                                   conv_opt = sum_glmer$optinfo$conv$opt, 
